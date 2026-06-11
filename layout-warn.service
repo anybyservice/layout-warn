@@ -1,0 +1,15 @@
+[Unit]
+Description=Wrong keyboard layout beep watchdog (beep-only)
+After=graphical-session.target
+
+[Service]
+Type=simple
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+Environment=LC_ALL=C.UTF-8
+ExecStart=%h/.local/bin/layout-warn.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

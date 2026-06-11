@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Layout Warn Tray
+Comment=Tray toggle for keyboard layout watchdog
+Exec=/home/any/.local/bin/layout-warn-tray.py
+Terminal=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=6
