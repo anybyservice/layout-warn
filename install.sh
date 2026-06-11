@@ -38,17 +38,15 @@ install -m 644 "$DIR/layout-warn.service" ~/.config/systemd/user/layout-warn.ser
 systemctl --user daemon-reload
 systemctl --user enable --now layout-warn.service
 
-echo ">>> 5/6  Трей-иконка вкл/выкл (автозапуск)"
-mkdir -p ~/.config/autostart
-# подставить реальный $HOME в Exec= автозапуска
-sed "s|^Exec=.*|Exec=$HOME/.local/bin/layout-warn-tray.py|" \
-    "$DIR/layout-warn-tray.desktop" > ~/.config/autostart/layout-warn-tray.desktop
-# запустить трей сразу (если есть графический сеанс)
-setsid "$HOME/.local/bin/layout-warn-tray.py" >/dev/null 2>&1 < /dev/null & disown || true
+echo ">>> 5/6  Трей-сервис вкл/выкл (systemd --user, Restart=always)"
+install -m 644 "$DIR/layout-warn-tray.service" ~/.config/systemd/user/layout-warn-tray.service
+systemctl --user daemon-reload
+systemctl --user enable --now layout-warn-tray.service
 
 echo ">>> 6/6  Проверка"
 sleep 2
-echo -n "Состояние сервиса: "; systemctl --user is-active layout-warn.service || true
+echo -n "Сторож: "; systemctl --user is-active layout-warn.service || true
+echo -n "Трей:   "; systemctl --user is-active layout-warn-tray.service || true
 echo
 echo "ГОТОВО. Набери в любом поле  ghbdtn  + пробел -> должен пискнуть."
 echo "Иконка клавиатуры в трее: клик -> меню вкл/выкл."

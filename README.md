@@ -10,7 +10,7 @@
 | `layout-warn.py` | сам сторож (python3-xlib + hunspell) |
 | `layout-warn.service` | systemd --user юнит (автозапуск + Restart=always) |
 | `layout-warn-tray.py` | трей-иконка вкл/выкл (GTK3 + AyatanaAppIndicator) |
-| `layout-warn-tray.desktop` | автозапуск трея на логине |
+| `layout-warn-tray.service` | systemd --user сервис трея (автозапуск + Restart=always) |
 | `install.sh` | автоустановка одной командой |
 
 ## Установка (быстро)
@@ -37,26 +37,26 @@ install -m 644 layout-warn.service ~/.config/systemd/user/layout-warn.service
 systemctl --user daemon-reload
 systemctl --user enable --now layout-warn.service
 
-# 4. трей-иконка вкл/выкл (автозапуск)
-mkdir -p ~/.config/autostart
-sed "s|^Exec=.*|Exec=$HOME/.local/bin/layout-warn-tray.py|" \
-    layout-warn-tray.desktop > ~/.config/autostart/layout-warn-tray.desktop
-~/.local/bin/layout-warn-tray.py &   # запустить сразу
+# 4. трей-сервис вкл/выкл
+install -m 644 layout-warn-tray.service ~/.config/systemd/user/layout-warn-tray.service
+systemctl --user daemon-reload
+systemctl --user enable --now layout-warn-tray.service
 ```
 
 ## Управление
 ```bash
-systemctl --user status  layout-warn      # состояние
-systemctl --user restart layout-warn      # перезапуск (после правки скрипта)
-systemctl --user stop    layout-warn      # стоп
-systemctl --user disable layout-warn      # убрать из автозапуска
-journalctl --user -u layout-warn -f       # логи живьём
+systemctl --user status  layout-warn       # состояние сторожа
+systemctl --user restart layout-warn       # перезапуск (после правки скрипта)
+systemctl --user stop    layout-warn       # стоп сторожа
+systemctl --user restart layout-warn-tray  # перезапуск трея (после правки трея)
+journalctl --user -u layout-warn -f        # логи живьём
 ```
 
 ## Трей-иконка
 Иконка клавиатуры в системном лотке. Клик → меню:
 - **Сторож активен** — галка вкл/выкл (запускает/останавливает сервис).
-- **Выход (трей)** — закрыть иконку (сам сторож продолжит работать).
+- **Выход (трей)** — закрыть иконку (сам сторож продолжит работать; сервис трея
+  перезапустит иконку через ~3с — чтобы убрать насовсем: `systemctl --user stop layout-warn-tray`).
 
 Иконка меняется: клавиатура = активен, пауза = выключен. Состояние
 синхронизируется каждые 2 сек (если включил/выключил сервис из терминала —
@@ -94,10 +94,9 @@ X11 (не Wayland), Linux Mint / Ubuntu с systemd. Раскладки: us + ru.
 
 ## Удаление
 ```bash
-systemctl --user disable --now layout-warn
-pkill -f layout-warn-tray.py
+systemctl --user disable --now layout-warn layout-warn-tray
 rm -f ~/.config/systemd/user/layout-warn.service \
-      ~/.config/autostart/layout-warn-tray.desktop \
+      ~/.config/systemd/user/layout-warn-tray.service \
       ~/.local/bin/layout-warn.py ~/.local/bin/layout-warn-tray.py
 systemctl --user daemon-reload
 ```
