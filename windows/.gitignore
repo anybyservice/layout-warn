@@ -1,0 +1,8 @@
+python/
+dict/
+wheels/
+dist/
+build/
+*.spec
+__pycache__/
+*.pyc
